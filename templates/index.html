@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Shorten URLs</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="card">
+    <h1>Easy URL Shortener</h1>
+    <form id="shortenForm">
+      <input type="url" id="urlInput" name="url" placeholder="Paste your long URL here" required>
+      <button type="submit">Shorten Now</button>
+    </form>
+    <div id="result" class="hidden"></div>
+    <hr>
+    <h3>How to Use</h3>
+    <ol>
+      <li>Go to the input field and paste a link, e.g.: https://www.example.com</li>
+      <li>Click "Shorten Now" and the short link will appear.</li>
+      <li>Click the short link or copy and open it in a new tab to test the redirection.</li>
+    </ol>
+  </div>
+
+<script>
+document.getElementById("shortenForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  let url = document.getElementById("urlInput").value;
+  const res = await fetch("/shorten", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({url})
+  });
+  const data = await res.json();
+  const result = document.getElementById("result");
+  result.classList.remove("hidden");
+  if (res.ok){
+    result.innerHTML = `<p>✅ Short URL: <a href="${data.short_url}" target="_blank">${data.short_url}</a></p>`;
+  } else {
+    result.innerHTML = `<p>❌ Error: ${data.error || 'Something went wrong'}</p>`;
+  }
+});
+</script>
+</body>
+</html>
