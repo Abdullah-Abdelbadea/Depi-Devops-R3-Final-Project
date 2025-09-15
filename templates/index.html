@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>اختصار الروابط - Week1</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="card">
+    <h1>مُختصر الروابط السهل</h1>
+    <form id="shortenForm">
+      <input type="url" id="urlInput" name="url" placeholder="ألصق الرابط الطويل هنا" required>
+      <button type="submit">اختصر الآن</button>
+    </form>
+    <div id="result" class="hidden"></div>
+    <hr>
+    <h3>كيفية التجربة</h3>
+    <ol>
+      <li اذهب إلى حقل الرابط، ألصق رابطًا مثل: https://www.example.com</li>
+      <li اضغط "اختصر الآن" وسيظهر الرابط المختصر.</li>
+      <li اضغط على الرابط المختصر أو انسخه وافتحه في تبويب جديد لتجربة إعادة التوجيه.</li>
+    </ol>
+  </div>
+
+<script>
+document.getElementById("shortenForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  let url = document.getElementById("urlInput").value;
+  const res = await fetch("/shorten", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({url})
+  });
+  const data = await res.json();
+  const result = document.getElementById("result");
+  result.classList.remove("hidden");
+  if (res.ok){
+    result.innerHTML = `<p>✅ الرابط المختصر: <a href="${data.short_url}" target="_blank">${data.short_url}</a></p>`;
+  } else {
+    result.innerHTML = `<p>❌ خطأ: ${data.error || 'حدث خطأ'}</p>`;
+  }
+});
+</script>
+</body>
+</html>
