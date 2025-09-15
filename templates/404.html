@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>404 - غير موجود</title>
+  <title>404 - Not Found</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <div class="card">
     <h1>404</h1>
-    <p>لم نجد أي رابط مطابق للكود: <strong>{{ code }}</strong></p>
-    <a href="/">العودة للرئيسية</a>
+    <p>No matching URL found for code: <strong>{{ code }}</strong></p>
+    <a href="/">Back to Home</a>
   </div>
 </body>
 </html>
