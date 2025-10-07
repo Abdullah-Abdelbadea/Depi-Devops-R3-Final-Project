@@ -68,7 +68,7 @@ def close_connection(exception):
 def index():
     return render_template("index.html")
 
-# 🧩 نضيف timing decorator للـ latency metrics
+# ====== URL SHORTENING AND REDIRECTION ======
 @app.route("/shorten", methods=["POST"])
 @shorten_latency.time()
 def shorten():
@@ -98,7 +98,7 @@ def shorten():
             return jsonify({"error":"could not generate unique code"}), 500
     short_url = request.host_url.rstrip("/") + "/" + short_code
 
-    # ✅ زيادة عدّاد URLs المقصّرة
+    # Increment the shorten counter
     shorten_counter.inc()
 
     return jsonify({"short_code": short_code, "short_url": short_url, "long_url": url})
@@ -117,7 +117,7 @@ def redirect_short(short_code):
         not_found_counter.inc()
         return render_template("404.html", code=short_code), 404
 
-# 🧩 Endpoint خاص بالـ metrics
+# ====== PROMETHEUS METRICS ENDPOINT ======
 @app.route("/metrics")
 def metrics():
     return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
