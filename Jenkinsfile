@@ -83,7 +83,7 @@ pipeline {
         stage('Build Alertmanager Image') {
             steps {
                 script {
-                    dir("prometheus/AlertmanagerDockerfile") {
+                    dir("prometheus/alertmanager") {
                         gv.buildImage(ECR_ALERTMANAGER, IMAGE_TAG)
                     }
                 }
