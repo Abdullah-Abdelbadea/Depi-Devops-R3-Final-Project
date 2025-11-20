@@ -85,6 +85,7 @@ pipeline {
                         gv.deployToEcs(CLUSTER, SERVICE, AWS_DEFAULT_REGION)
                 }
             }
+            }
         }
     }
 }
