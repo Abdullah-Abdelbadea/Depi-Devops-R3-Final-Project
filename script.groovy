@@ -24,3 +24,4 @@ def deployToEcs(cluster, service, region) {
     --region ${region}
     """
 }
+return this
