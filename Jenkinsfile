@@ -69,9 +69,20 @@ pipeline {
 
         stage('Deploy to ECS') {
             steps {
-                script {
-                    echo "Testing Deploy"
-                    gv.deployToEcs(CLUSTER, SERVICE, AWS_DEFAULT_REGION)
+                withCredentials([usernamePassword(
+                    credentialsId: 'aws-creds',
+                    usernameVariable: 'AWS_ACCESS_KEY_ID',
+                    passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                )]) {
+                    script {
+                        sh """
+                        echo "Testing before export" 
+                        export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+                        export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+                        echo "Testing after export"
+                        """
+                        echo "Testing Deploy"
+                        gv.deployToEcs(CLUSTER, SERVICE, AWS_DEFAULT_REGION)
                 }
             }
         }
