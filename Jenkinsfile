@@ -22,6 +22,7 @@ pipeline {
         stage('Load Functions') {
             steps {
                 script {
+                    echo "testing Loading"
                     gv = load 'script.groovy'
                 }
             }
@@ -36,8 +37,10 @@ pipeline {
                 )]) {
                     script {
                         sh """
+                        echo "Testing before export" 
                         export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
                         export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+                        echo "Testing after export"
                         """
 
                         gv.awsLogin(ECR_REPO, AWS_DEFAULT_REGION)
@@ -49,6 +52,7 @@ pipeline {
         stage('Build Image') {
             steps {
                 script {
+                    echo "Testing build"
                     gv.buildImage(ECR_REPO, IMAGE_TAG)
                 }
             }
@@ -57,6 +61,7 @@ pipeline {
         stage('Push Image') {
             steps {
                 script {
+                    echo "Testing Push"
                     gv.pushImage(ECR_REPO, IMAGE_TAG)
                 }
             }
@@ -65,6 +70,7 @@ pipeline {
         stage('Deploy to ECS') {
             steps {
                 script {
+                    echo "Testing Deploy"
                     gv.deployToEcs(CLUSTER, SERVICE, AWS_DEFAULT_REGION)
                 }
             }
