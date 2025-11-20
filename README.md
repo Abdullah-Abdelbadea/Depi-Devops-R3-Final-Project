@@ -21,7 +21,7 @@ Open the browser at: `http://localhost:5000`
 Build the image:
 
 ```bash
-docker build -t url-shortener:week1 .
+docker run
 ```
 
 Run the container:
@@ -33,7 +33,7 @@ docker run -p 5000:5000 -v $(pwd)/data:/data url-shortener:week1
 Or using Docker Compose:
 
 ```bash
-docker-compose up --build
+docker compose up 
 ```
 
 ---
@@ -66,7 +66,7 @@ Go to github.com -> New repository -> Set the name (e.g., `url-shortener-week1`)
 Link the local repo:
 
 ```bash
-git remote add origin https://github.com/<your-username>/url-shortener-week1.git
+git remote add origin https://github.com/Abdullah-Abdelbadea/Depi-Devops-R3-Final-Project.git
 git push -u origin main
 ```
 
@@ -77,7 +77,6 @@ gh auth login   # if not logged in
 gh repo create url-shortener-week1 --public --source=. --remote=origin --push
 ```
 
-After pushing, you will see the files on your GitHub repository page.
 
 ---
 
