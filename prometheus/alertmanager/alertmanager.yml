@@ -16,7 +16,7 @@ receivers:
     chat_id: 1265929713
     message: "*Alert:* {{ .CommonLabels.alertname }}\n*Severity:* {{ .CommonLabels.severity }}\n{{ .CommonAnnotations.description }}"
     parse_mode: 'Markdown'
-  
+
   email_configs:
     - to: "m.abdelhameed2003@gmail.com"
       from: "m.abdelhameed2003@gmail.com"
@@ -32,9 +32,15 @@ receivers:
         <p>{{ .CommonAnnotations.description }}</p>
         <p>Starts: {{ range .Alerts }}{{ .StartsAt }} {{ end }}</p>
 
+alertmanagers:
+  - static_configs:
+      - targets:
+          - "alertmanager.depi.local:9093"
+
 inhibit_rules:
 - source_match:
     severity: 'critical'
   target_match:
     severity: 'warning'
   equal: ['alertname', 'dev', 'instance']
+

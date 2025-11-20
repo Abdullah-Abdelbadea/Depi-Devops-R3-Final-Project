@@ -4,5 +4,5 @@ datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://192.168.65.128:9091
+    url: http://prometheus.depi.local:9090
     isDefault: true
