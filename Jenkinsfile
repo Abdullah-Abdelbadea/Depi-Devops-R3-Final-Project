@@ -13,11 +13,11 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/Abdullah-Abdelbadea/Depi-Devops-R3-Final-Project.git'
-            }
-        }
+        // stage('Checkout') {
+        //     steps {
+        //         git 'https://github.com/Abdullah-Abdelbadea/Depi-Devops-R3-Final-Project.git'
+        //     }
+        // }
 
         stage('Load Functions') {
             steps {
