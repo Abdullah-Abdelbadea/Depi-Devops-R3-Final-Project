@@ -132,3 +132,27 @@ Scrape the Flask web service metrics endpoint
 Use a 5-second scrape interval for better resolution
 
 >>>>week 5 (Fakhry)
+>>>>
+>>>>
+---
+## CI/CD
+
+In Jenkins Dashbord you should install 
+```
+AWS Credentials
+```
+then make a Credential from
+```
+Jenkins -> Manage Credentials -> Add
+the ID = 'aws-creds'
+username = access Key
+password = secret key
+(From Aws Service)
+```
+
+In the Machine install the awscli
+```
+yum install -y awscli
+or
+pip3 install awscli --upgrade --user
+```
