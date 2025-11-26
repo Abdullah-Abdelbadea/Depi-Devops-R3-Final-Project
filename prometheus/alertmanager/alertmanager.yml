@@ -1,0 +1,46 @@
+global:
+  resolve_timeout: 15s
+
+route:
+  receiver: 'notifications'
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 15s
+  repeat_interval: 1h
+
+receivers:
+- name: 'notifications'
+  telegram_configs:
+  - bot_token: '8575957549:AAHsrvzeZMlAnjUQxLwhmZDHmzu_Asi3euU'
+    api_url: 'https://api.telegram.org'
+    chat_id: 1265929713
+    message: "*Alert:* {{ .CommonLabels.alertname }}\n*Severity:* {{ .CommonLabels.severity }}\n{{ .CommonAnnotations.description }}"
+    parse_mode: 'Markdown'
+
+  email_configs:
+    - to: "m.abdelhameed2003@gmail.com"
+      from: "m.abdelhameed2003@gmail.com"
+      smarthost: "smtp.gmail.com:587"
+      auth_username: "m.abdelhameed2003@gmail.com"
+      auth_identity: "m.abdelhameed2003@gmail.com"
+      auth_password: "<will be added manually>"
+      require_tls: true
+      headers:
+        Subject: "[Alert] {{ .CommonLabels.alertname }} ({{ .CommonLabels.severity }})"
+      html: |-
+        <p><strong>{{ .CommonLabels.alertname }}</strong> ({{ .CommonLabels.severity }})</p>
+        <p>{{ .CommonAnnotations.description }}</p>
+        <p>Starts: {{ range .Alerts }}{{ .StartsAt }} {{ end }}</p>
+
+alertmanagers:
+  - static_configs:
+      - targets:
+          - "alertmanager.depi.local:9093"
+
+inhibit_rules:
+- source_match:
+    severity: 'critical'
+  target_match:
+    severity: 'warning'
+  equal: ['alertname', 'dev', 'instance']
+

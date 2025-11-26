@@ -1,0 +1,57 @@
+groups:
+  - name: url_shortener_alerts
+    rules:
+
+      # 1) Instance down (Prometheus built-in "up" metric)
+      - alert: WebServiceDown
+        expr: up{job="flask_app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Web service is down (job=web)"
+          description: "Prometheus cannot scrape the web service (web:5000) for more than 1m."
+
+      # 2) Too many failed lookups (404s)
+      - alert: TooManyFailedLookups
+        expr: increase(url_not_found_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Many failed URL lookups"
+          description: "More than 10 failed lookups in the last 5 minutes."
+
+      # 3) High shorten latency (95th percentile > 1s)
+      - alert: HighShortenLatency
+        expr: >
+          histogram_quantile(0.95, sum(rate(shorten_request_latency_seconds_bucket[5m])) by (le))
+          > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High shorten latency (95th percentile)"
+          description: "95th percentile latency for /shorten greater than 1s over 5 minutes."
+
+      # 4) High redirect latency (95th percentile > 1s)
+      - alert: HighRedirectLatency
+        expr: >
+          histogram_quantile(0.95, sum(rate(redirect_request_latency_seconds_bucket[5m])) by (le))
+          >1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High redirect latency (95th percentile)"
+          description: "95th percentile latency for redirects greater than 1s over 5 minutes."
+
+      # 5) Very low redirect rate (service not redirecting traffic)
+      - alert: NoRedirects
+        expr: rate(url_redirects_total[5m]) < 0.001
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No redirects happening"
+          description: "Redirect rate < 0.001 req/s for 10 minutes; maybe service not serving redirects."

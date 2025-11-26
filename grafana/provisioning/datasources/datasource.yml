@@ -1,0 +1,9 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    uid: df15by2htgetce
+    type: prometheus
+    access: proxy
+    url: http://prometheus.depi.local:9090
+    isDefault: true

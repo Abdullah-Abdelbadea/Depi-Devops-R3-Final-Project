@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   web:
-    build: .
+    image: hassankaoud/url-shortener:latest
     ports:
       - "5000:5000"
     environment:
@@ -15,9 +15,38 @@ services:
     container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alerts.rules.yml:/etc/prometheus/alerts.rules.yml:ro
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
-      - "9090:9090"
+      - "9091:9090"
     depends_on:
       - web
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    volumes:
+      - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    ports:
+      - "9093:9093"
+    depends_on:
+      - prometheus
+
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+
+volumes:
+  grafana-storage:
