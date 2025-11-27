@@ -92,7 +92,7 @@ Week 1 focused on building the main Flask service, containerizing it with Docker
 
 
 
-# URL Shortener (Flask) + Prometheus Monitoring  
+#  URL Shortener – Week 2 Progress
 **Author:** Abdullah Mohamed Abdelbadea  
 **Team Role:** Backend (URL Shortener Service + Prometheus Instrumentation)  
 
@@ -265,14 +265,7 @@ increase(url_not_found_total[5m]) /
 
 ---
 
-## Summary
+## ⭐ Summary of Week 2
 This part of the system provides a fully functional **URL Shortening API** instrumented with **Prometheus metrics**, running inside Docker, and ready for monitoring dashboards or alerting systems.
 
-If the team needs:
-- Grafana dashboards  
-- Gunicorn production deployment  
-- API documentation (swagger/postman)  
 
-I can prepare that as well.
-
----
