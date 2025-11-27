@@ -430,5 +430,158 @@ This automatically loads:
 
 ---
 
+-------------------------------------------------------------------------------------------------------
+
+### URL Shortener – Week 4 Progress
+
+### Monitoring & Alerting (Prometheus + Alertmanager)
+
+## Overview
+
+* During Week 4, I implemented the complete alerting pipeline for the project using:
+
+* Prometheus alert rules
+
+* Alertmanager with Telegram + Gmail notifications
+
+* Updated Prometheus configuration
+
+* A full monitoring → alerting workflow
+
+This adds production-grade observability to the system built in Weeks 1–3.
+
+## Features Added This Week
+## 1. Prometheus Alert Rules
+
+A full alert rules file (alerts.rules.yml) was created with conditions that automatically detect failures and performance issues.
+
+| Alert Name               | Purpose                     | Trigger                                  |
+| ------------------------ | --------------------------- | ---------------------------------------- |
+| **WebServiceDown**       | Detect service outage       | `up == 0` for 1m                         |
+| **TooManyFailedLookups** | Detect excessive 404 errors | `increase(url_not_found_total[5m]) > 10` |
+| **HighShortenLatency**   | Slow `/shorten` requests    | 95th percentile > 1s                     |
+| **HighRedirectLatency**  | Slow redirects              | 95th percentile > 1s                     |
+| **NoRedirects**          | Service idle but running    | redirect rate < 0.001                    |
 
 
+# These alerts protect availability & performance.
+
+## 2. Alertmanager Configuration
+
+* File: alertmanager.yml
+
+* Two notification channels were added:
+
+# Telegram Alerts
+
+* Sends instant messages to Telegram chat
+
+* Markdown formatting
+
+* Uses bot token + chat ID
+
+# Gmail Email Alerts
+
+* HTML formatted alerts
+
+* Uses Gmail SMTP (App Password)
+
+* Secure TLS connection
+
+All alerts are routed through a receiver named notifications.
+
+## 3. Alert Routing & Suppression
+
+* Key Alertmanager features configured:
+
+* group_by: alertname → avoids spam
+
+* group_wait: 30s
+
+* group_interval: 15s
+
+* repeat_interval: 1h
+
+# Inhibition rules: suppress warnings if a critical alert for same service is firing
+
+This ensures professional-level signal-to-noise control.
+
+# Configuration Files Added This Week
+prometheus/
+│── alerts.rules.yml     # All alert definitions
+│── alertmanager.yml     # Notification routing (Telegram + Gmail)
+└── prometheus.yml       # Updated to load rules + alertmanager
+
+## Docker Compose Integration
+
+# Alertmanager service added:
+
+alertmanager:
+  image: prom/alertmanager:latest
+  container_name: alertmanager
+  volumes:
+    - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+  command:
+    - '--config.file=/etc/alertmanager/alertmanager.yml'
+  ports:
+    - "9093:9093"
+
+
+# Prometheus now loads alerts:
+
+volumes:
+  - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  - ./prometheus/alerts.rules.yml:/etc/prometheus/alerts.rules.yml:ro
+
+## How Alerts Flow (Monitoring → Alerting)
+
+* Flask app exposes /metrics
+
+* Prometheus scrapes data every 5 seconds
+
+* Alert rules evaluate conditions
+
+* If triggered → alert sent to Alertmanager
+
+* Alertmanager:
+
+* Groups alerts
+
+* Applies inhibition
+
+* Sends notifications to Telegram + Email
+
+* Alerts reach:
+
+📱 Telegram instantly
+
+📧 Gmail with full HTML details
+
+## 📊 Useful PromQL Queries
+# Check service uptime
+* up{job="flask_app"}
+
+# URL 404 spike
+* increase(url_not_found_total[5m])
+
+# 95th percentile latency
+* histogram_quantile(0.95, sum(rate(shorten_request_latency_seconds_bucket[5m])) by (le))
+
+# Redirect traffic rate
+* rate(url_redirects_total[1m])
+
+## Week 4 Summary
+
+* Week 4 introduces the full alerting system for the project:
+
+* Advanced Prometheus alerting
+
+* Full Alertmanager pipeline
+
+* Dual-channel notifications (Telegram + Gmail)
+
+* Intelligent alert grouping & suppression
+
+* Production-ready monitoring workflow
+
+* This completes the full observability layer for the URL Shortener system.
