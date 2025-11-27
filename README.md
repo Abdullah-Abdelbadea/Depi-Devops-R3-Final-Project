@@ -480,13 +480,45 @@ A full alert rules file (alerts.rules.yml) was created with conditions that auto
 
 * Uses bot token + chat ID
 
+# Adding Telegram Alerts (Steps)
+
+* Create a Telegram Bot
+
+* Get Chat ID
+
+* Add Telegram Settings to Alertmanager :
+```yaml
+telegram_configs:
+  - bot_token: "<bot_token>"
+    api_url: "https://api.telegram.org"
+    chat_id: <chat_id>
+    message: "*Alert:* {{ .CommonLabels.alertname }}\n*Severity:* {{ .CommonLabels.severity }}\n{{ .CommonAnnotations.description }}"
+    parse_mode: "Markdown"
+```
+
 # Gmail Email Alerts
 
 * HTML formatted alerts
 
 * Uses Gmail SMTP (App Password)
 
-* Secure TLS connection
+# Adding Gmail Email Alerts (Steps)
+
+* Enable 2-Step Verification
+
+* Create a Gmail App Password
+
+* Add Email Settings to Alertmanager :
+```yaml
+email_configs:
+  - to: "your_email@gmail.com"
+    from: "your_email@gmail.com"
+    smarthost: "smtp.gmail.com:587"
+    auth_username: "your_email@gmail.com"
+    auth_identity: "your_email@gmail.com"
+    auth_password: "<app_password>"
+    require_tls: true
+```
 
 All alerts are routed through a receiver named notifications.
 
@@ -502,7 +534,7 @@ All alerts are routed through a receiver named notifications.
 
 * repeat_interval: 1h
 
-# Inhibition rules: suppress warnings if a critical alert for same service is firing
+Inhibition rules: suppress warnings if a critical alert for same service is firing
 
 This ensures professional-level signal-to-noise control.
 
@@ -511,11 +543,27 @@ prometheus/
 │── alerts.rules.yml     # All alert definitions
 │── alertmanager.yml     # Notification routing (Telegram + Gmail)
 └── prometheus.yml       # Updated to load rules + alertmanager
+## 4. Prometheus Configuration Updates
 
+* File: prometheus.yml
+
+* The following additions were made:
+
+```yaml
+rule_files:
+  - ./prometheus/alerts.rules.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+```
 ## Docker Compose Integration
 
 # Alertmanager service added:
 
+```yaml
 alertmanager:
   image: prom/alertmanager:latest
   container_name: alertmanager
@@ -525,12 +573,12 @@ alertmanager:
     - '--config.file=/etc/alertmanager/alertmanager.yml'
   ports:
     - "9093:9093"
+```
 
 
 # Prometheus now loads alerts:
 
 volumes:
-  - ./prometheus.yml:/etc/prometheus/prometheus.yml
   - ./prometheus/alerts.rules.yml:/etc/prometheus/alerts.rules.yml:ro
 
 ## How Alerts Flow (Monitoring → Alerting)
@@ -559,16 +607,16 @@ volumes:
 
 ## 📊 Useful PromQL Queries
 # Check service uptime
-* up{job="flask_app"}
+``` up{job="flask_app"} ```
 
 # URL 404 spike
-* increase(url_not_found_total[5m])
+``` increase(url_not_found_total[5m]) > 10 ```
 
 # 95th percentile latency
-* histogram_quantile(0.95, sum(rate(shorten_request_latency_seconds_bucket[5m])) by (le))
+``` histogram_quantile(0.95, sum(rate(shorten_request_latency_seconds_bucket[5m])) by (le)) > 1 ```
 
 # Redirect traffic rate
-* rate(url_redirects_total[1m])
+``` rate(url_redirects_total[5m]) < .01 ```
 
 ## Week 4 Summary
 
