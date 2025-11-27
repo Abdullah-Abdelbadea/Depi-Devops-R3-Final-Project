@@ -268,4 +268,167 @@ increase(url_not_found_total[5m]) /
 ## ⭐ Summary of Week 2
 This part of the system provides a fully functional **URL Shortening API** instrumented with **Prometheus metrics**, running inside Docker, and ready for monitoring dashboards or alerting systems.
 
+---------------------------------------------------------------------------
+
+#  URL Shortener – Week 3 Progress
+**Author:** mohamed adel mohamed kaoud  
+**Team Role:** (Advanced Visualization with Grafana)  
+---
+<div dir="rtl">
+
+# Grafana Monitoring Project
+
+This project sets up **Grafana** using Docker with full **Provisioning Automation**, including:
+
+* Automatic Prometheus datasource creation
+* Automatic dashboard import using a JSON file
+* Support for fixed UID to keep dashboards persistent across redeployments
+
+---
+
+## Overview
+
+The project uses Grafana’s provisioning system to automatically configure everything at startup without needing to import dashboards manually from the UI.
+All datasource and dashboard configurations are stored inside the `provisioning` directory.
+
+---
+
+## Features
+
+### 1. Automated Prometheus Datasource Provisioning
+
+A configuration file is placed inside:
+
+```
+provisioning/datasources/datasource.yaml
+```
+
+This file automatically:
+
+* Creates a Prometheus datasource when Grafana starts
+* Sets `http://prometheus:9091` as the datasource URL
+* Marks it as the default datasource
+* Prevents manual changes for stability
+
+**Example (datasource.yaml):**
+
+```yaml
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+```
+
+---
+
+### 2. Automated Dashboard Import (Provisioning)
+
+A dashboard provider configuration is stored in:
+
+```
+provisioning/dashboards/dashboard.yaml
+```
+
+This file:
+
+* Automatically imports all dashboards inside a specified folder
+* Assigns them to a custom Grafana folder
+* Reloads dashboards if the files change
+* Works with fixed UIDs
+
+**Example (dashboard.yaml):**
+
+```yaml
+apiVersion: 1
+
+providers:
+  - name: 'default'
+    orgId: 1
+    folder: 'Imported Dashboards'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
+```
+
+---
+
+### 3. Automatically Imported Dashboard JSON (with fixed UID)
+
+Dashboard files are placed inside:
+
+```
+provisioning/dashboards/json/
+```
+
+Example dashboard JSON (`my-dashboard.json`):
+
+```json
+{
+  "uid": "my-dashboard-001",
+  "title": "System Monitoring Dashboard",
+  "schemaVersion": 36,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "graph",
+      "title": "CPU Usage",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "node_cpu_seconds_total" }
+      ]
+    }
+  ]
+}
+```
+
+The fixed UID ensures:
+
+* No duplicate dashboards on restart
+* Same dashboard can be updated automatically
+* Stable API references
+
+---
+
+## Docker Compose Setup
+
+```yaml
+services:
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning
+```
+
+This automatically loads:
+
+* Datasources
+* Dashboards
+* UID configuration
+
+---
+
+## What This Project Provides
+
+* Fully automated Grafana setup
+* Zero manual importing required
+* Preconfigured Prometheus datasource
+* Dashboard auto-loading with persistent UID
+* Clean provisioning folder structure
+* Production-ready configuration
+
+---
+
+
 
