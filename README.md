@@ -90,3 +90,189 @@ Week 1 focused on building the main Flask service, containerizing it with Docker
 
 ---
 
+
+
+# URL Shortener (Flask) + Prometheus Monitoring  
+**Author:** Abdullah Mohamed Abdelbadea  
+**Team Role:** Backend (URL Shortener Service + Prometheus Instrumentation)  
+
+---
+
+## Overview
+This component of the project implements a **Flask-based URL Shortener** that stores URLs in a SQLite database and exposes an endpoint for Prometheus to scrape runtime metrics. The service provides:
+
+- URL shortening (`POST /shorten`)
+- Redirection via short codes (`GET /<short_code>`)
+- Exported Prometheus metrics (`GET /metrics`)
+- SQLite persistent storage
+- Dockerized deployment with Prometheus integration
+
+This README documents only **my part** of the system.
+
+---
+
+## Features
+- Generate unique short codes using secure random generation.
+- Store URLs in a SQLite database with auto-creation on startup.
+- Automatic redirection using the generated short code.
+- Integrated Prometheus monitoring.
+- Fully containerized using Docker Compose.
+
+---
+
+## Application Endpoints
+
+### `POST /shorten`
+Shortens a given long URL.
+
+**Request (JSON):**
+```json
+{
+  "url": "https://example.com/long/path"
+}
+```
+
+**Response:**
+```json
+{
+  "short_code": "Ab12C3",
+  "short_url": "http://localhost:5000/Ab12C3",
+  "long_url": "https://example.com/long/path"
+}
+```
+
+### `GET /<short_code>`
+Redirects to the original long URL  
+- Returns **302 redirect** if found  
+- Returns **404 page** if the code does not exist  
+
+### `GET /metrics`
+Exposes all Prometheus metrics for scraping.
+
+---
+
+## Prometheus Metrics Included
+The application exports the following counters and histograms:
+
+| Metric Name | Type | Description |
+|-------------|------|-------------|
+| `url_shortened_total` | Counter | Number of successfully shortened URLs |
+| `url_redirects_total` | Counter | Successful redirect operations |
+| `url_not_found_total` | Counter | Number of 404 lookups due to unknown short codes |
+| `shorten_request_latency_seconds` | Histogram | Latency for `/shorten` requests |
+| `redirect_request_latency_seconds` | Histogram | Latency for redirect operations |
+
+These metrics are exposed automatically at the `/metrics` endpoint.
+
+---
+
+## Docker Compose Setup
+Below is the part relevant to my service:
+
+### `docker-compose.yml`
+```yaml
+prometheus:
+  image: prom/prometheus:latest
+  container_name: prometheus
+  volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    - ./prometheus/alerts.rules.yml:/etc/prometheus/alerts.rules.yml:ro
+  command:
+    - '--config.file=/etc/prometheus/prometheus.yml'
+  ports:
+    - "9091:9090"
+  depends_on:
+    - web
+```
+
+---
+
+## Prometheus Configuration
+### `prometheus.yml`
+```yaml
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'flask_app'
+    static_configs:
+      - targets: ['web:5000']
+```
+
+Prometheus scrapes the Flask service every **5 seconds** via the Docker network.
+
+---
+
+## Database
+- SQLite file path: `data/url_shortener.db`
+- Automatically created if missing
+- Table schema:
+```sql
+CREATE TABLE IF NOT EXISTS urls (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  short_code TEXT UNIQUE,
+  long_url TEXT NOT NULL,
+  created_at INTEGER
+);
+```
+
+---
+
+## Running the Service
+
+### Start using Docker Compose:
+```bash
+docker compose up --build -d
+```
+
+### Access:
+- App Homepage → `http://localhost:5000/`
+- Metrics → `http://localhost:5000/metrics`
+- Prometheus → `http://localhost:9091/` (based on your mapping)
+
+---
+
+## Useful PromQL Queries
+
+### URL Shortening Rate (per minute)
+```
+rate(url_shortened_total[1m])
+```
+
+### Redirects over the last hour
+```
+increase(url_redirects_total[1h])
+```
+
+### 95th Percentile Latency (5-minute window)
+```
+histogram_quantile(0.95, sum(rate(shorten_request_latency_seconds_bucket[5m])) by (le))
+```
+
+### 404 Ratio
+```
+increase(url_not_found_total[5m]) /
+(increase(url_redirects_total[5m]) + increase(url_not_found_total[5m]))
+```
+
+---
+
+## Notes & Troubleshooting
+- Ensure the Flask service name is **`web`** in Docker Compose to match the Prometheus configuration.
+- `/metrics` must be accessible from inside the Prometheus container.
+- If the host port for Prometheus is changed, update the team documentation accordingly.
+- Increase `SHORT_CODE_LEN` if collisions occur.
+
+---
+
+## Summary
+This part of the system provides a fully functional **URL Shortening API** instrumented with **Prometheus metrics**, running inside Docker, and ready for monitoring dashboards or alerting systems.
+
+If the team needs:
+- Grafana dashboards  
+- Gunicorn production deployment  
+- API documentation (swagger/postman)  
+
+I can prepare that as well.
+
+---
