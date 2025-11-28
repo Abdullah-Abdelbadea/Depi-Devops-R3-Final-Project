@@ -739,3 +739,133 @@ This final component completes the full lifecycle of the project from developmen
 * Production-ready monitoring workflow
 
 * This completes the full observability layer for the URL Shortener system.
+
+---
+# AWS
+
+## 🚀 AWS Deployment Overview
+
+This project is fully deployed on **AWS** using a container-based architecture.  
+The backend service (Flask URL Shortener), Prometheus, Grafana, and Alertmanager are all deployed as **independent ECS services**, each using Docker images stored in **Amazon ECR**.
+
+---
+
+## 🧱 AWS Architecture Components
+
+### 1. **Amazon ECR (Elastic Container Registry)**
+Four repositories were created to store Docker images:
+
+- `depi-devops-project` — Flask web application  
+- `depi-prometheus`  
+- `depi-grafana`  
+- `depi-alertmanager`
+
+Images are built and pushed automatically through a Jenkins pipeline using AWS CLI authentication.
+
+---
+
+### 2. **Amazon ECS (Elastic Container Service)**
+The system runs using **ECS EC2 mode**, where each component is deployed as a separate ECS service.
+
+Created ECS services:
+
+- **Web Service** (Flask app)
+- **Prometheus Service**
+- **Grafana Service**
+- **Alertmanager Service**
+
+Each service pulls its Docker image from the corresponding ECR repository.
+
+---
+
+### 3. **ECS Task Definitions**
+Each service has its own task definition containing:
+
+- ECR image reference  
+- Exposed ports  
+- CPU & memory limits  
+- Logging via CloudWatch  
+- Environment variables (for web app)
+
+This ensures independent and scalable microservice-style deployment.
+
+---
+
+### 4. **Networking (VPC + Security Groups)**
+
+Internal communication includes:
+
+- Prometheus → Web App (metrics scraping)  
+- Prometheus → Alertmanager (alert delivery)  
+- Grafana → Prometheus (dashboard queries)
+
+Security groups allow specific ports:
+
+- **5000** – Web App  
+- **9090** – Prometheus  
+- **9093** – Alertmanager  
+- **3000** – Grafana
+
+Only internal traffic between services is allowed.
+
+---
+
+### 5. **AWS CloudWatch Logs**
+All ECS containers send logs to **CloudWatch** using:
+
+```json
+"awslogs-group": "/ecs/<service-name>",
+"awslogs-region": "eu-north-1",
+"awslogs-stream-prefix": "ecs"
+```
+
+---
+
+### 6. **Jenkins CI/CD Pipeline**
+
+The Jenkins pipeline automates the deployment process for all services (Web, Prometheus, Alertmanager, Grafana).  
+The pipeline performs the following steps:
+
+1. **Authenticate to AWS ECR** using:
+   ```bash
+   aws ecr get-login-password
+   ```
+2. **Build Docker images** for each service.
+3. **Push images** to the AWS ECR repositories.
+4. **Trigger ECS rolling updates** using:
+   ```bash
+   aws ecs update-service --force-new-deployment
+   ```
+This ensures that any new code change is automatically built, pushed, and deployed to ECS.
+
+
+---
+
+### 7. **Monitoring & Alerting on AWS**
+
+- **Prometheus** scrapes metrics from the Flask application and evaluates alert rules.
+- **Alertmanager** sends notifications through:
+  - **Telegram Bot**
+  - **Email (SMTP Gmail)**
+- **Grafana** loads:
+  - Pre-provisioned datasources  
+  - Pre-provisioned dashboards  
+- All services run in separate ECS tasks, each pulling its latest image from ECR.
+
+
+---
+
+### **AWS Summary**
+
+This project uses AWS services to create a fully automated, scalable, and observable deployment environment:
+
+- **Amazon ECR** stores all Docker images for Web, Prometheus, Alertmanager, and Grafana.
+- **Amazon ECS (EC2 Launch Type)** runs each service in an isolated task.
+- **Jenkins** automatically builds, pushes, and deploys updates to ECS through a CI/CD pipeline.
+- **Prometheus, Alertmanager, and Grafana** are deployed on AWS and connected together to provide:
+  - Real-time metrics  
+  - Custom dashboards  
+  - Automated Telegram & Email alerts  
+- The system is fully integrated and continuously updated with every code change.
+
+This AWS setup ensures reliability, automation, and complete visibility over application performance.
