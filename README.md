@@ -630,6 +630,112 @@ volumes:
 
 * Intelligent alert grouping & suppression
 
+---
+# URL Shortener – Week 5 Progress
+
+**Author:** _Mahmoud Elsayed Hussein_  
+**Team Role:** _CI/CD Pipeline – Jenkins_  
+**Branch:** `pipeline`
+
+---
+
+## Overview
+
+During Week 5, I implemented the complete **CI/CD pipeline** for the project using **Jenkins**, fully integrated with **AWS ECR** and **AWS ECS**.  
+This pipeline automates the entire flow: **code push → Docker build → push to ECR → automatic ECS deployment**.
+
+All pipeline-related work is located in the GitHub branch:  
+➡️ **`pipeline`**
+
+---
+
+## 🚀 Key Deliverables
+
+### ✔ 1. Jenkinsfile
+
+A full declarative pipeline that automates:
+
+- Loading shared functions from `script.groovy`
+- AWS authentication using Jenkins credentials
+- Building Docker images for:
+  - Web App (Flask)
+  - Prometheus
+  - Alertmanager
+  - Grafana
+- Pushing all images to Amazon ECR
+- Deploying all services to Amazon ECS using rolling updates
+
+---
+
+### ✔ 2. script.groovy
+
+A helper script that provides reusable functions:
+
+| Function | Description |
+|---------|-------------|
+| `buildImage(repo, tag)` | Builds Docker images |
+| `awsLogin(repo, region)` | Logs Jenkins into AWS ECR |
+| `pushImage(repo, tag)` | Pushes images to ECR |
+| `deployToEcs(cluster, service, region)` | Triggers ECS rolling deployments |
+
+This approach keeps the Jenkinsfile clean and modular.
+
+---
+
+## 🔁 CI/CD Pipeline Workflow
+
+### **1. Developer Pushes to GitHub (`pipeline` branch)**  
+Jenkins automatically triggers the pipeline.
+
+### **2. AWS ECR Login**  
+Jenkins authenticates using stored AWS credentials (`aws-creds`).
+
+### **3. Build Docker Images**  
+All four services (Web, Prometheus, Alertmanager, Grafana) are built from source.
+
+### **4. Push Images to AWS ECR**  
+Each image is pushed to its corresponding ECR repository.
+
+### **5. Deploy to AWS ECS**
+
+
+---
+
+## 🏗️ AWS Services Used
+
+| AWS Service | Purpose |
+|-------------|---------|
+| **ECR** | Stores Docker images |
+| **ECS (Fargate)** | Runs the containers in production |
+| **IAM** | Secures Jenkins → AWS access |
+| **Jenkins** | Automates CI/CD pipeline |
+
+---
+
+## 🎯 Benefits of the Pipeline
+
+- Fully automated build → push → deploy process
+- Zero manual AWS command execution
+- Ensures all services are always up-to-date
+- Production-grade CI/CD workflow
+- Clean and scalable deployment architecture
+
+---
+
+## ⭐ Summary of Week 5
+
+In Week 5, I delivered the **CI/CD automation pipeline**:
+
+- Implemented Jenkinsfile
+- Created modular `script.groovy`
+- Automated Docker builds for all services
+- Automated pushes to AWS ECR
+- Automated deployments to AWS ECS
+- Completed the production-level DevOps workflow
+
+This final component completes the full lifecycle of the project from development → monitoring → alerting → CI/CD deployment.
+
+
 * Production-ready monitoring workflow
 
 * This completes the full observability layer for the URL Shortener system.
