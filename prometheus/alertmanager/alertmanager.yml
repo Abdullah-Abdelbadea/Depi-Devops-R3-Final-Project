@@ -32,10 +32,6 @@ receivers:
         <p>{{ .CommonAnnotations.description }}</p>
         <p>Starts: {{ range .Alerts }}{{ .StartsAt }} {{ end }}</p>
 
-alertmanagers:
-  - static_configs:
-      - targets:
-          - "alertmanager.depi.local:9093"
 
 inhibit_rules:
 - source_match:
